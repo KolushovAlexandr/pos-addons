@@ -202,9 +202,12 @@ odoo.define('pos_multi_session', function(require){
 
             _.each(data.lines, function(dline){
                 dline = dline[2];
-                var line = order.orderlines.find(function(r){
-                    return dline.uid == r.uid;
-                });
+//              if was added to prevent errors caused by "undefined == undefined"
+                if (dline.uid){
+                     var line = order.orderlines.find(function(r){
+                        return dline.uid == r.uid;
+                    });
+                };
                 not_found = _.without(not_found, dline.uid);
                 var product = pos.db.get_product_by_id(dline.product_id);
                 if (!line){
@@ -401,7 +404,7 @@ odoo.define('pos_multi_session', function(require){
             var self = this;
             OrderlineSuper.prototype.initialize.apply(this, arguments);
             this.ms_info = {};
-            if (!this.order)
+            if (this.order.screen_data.screen == "splitbill")
                 // ignore new orderline from splitbill tool
                 return;
             if (this.order.ms_check()){
