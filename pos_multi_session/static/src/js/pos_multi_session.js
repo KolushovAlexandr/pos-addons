@@ -202,8 +202,9 @@ odoo.define('pos_multi_session', function(require){
 
             _.each(data.lines, function(dline){
                 dline = dline[2];
-//              if was added to prevent errors caused by "undefined == undefined"
+                line = false;
                 if (dline.uid){
+//                  dline.uid can be undefined
                      var line = order.orderlines.find(function(r){
                         return dline.uid == r.uid;
                     });
