@@ -7,6 +7,7 @@ odoo.define('pos_discount_absolute', function (require) {
     var PosBaseWidget = require('point_of_sale.BaseWidget');
     var PopupWidget = require('point_of_sale.popups');
     var core = require('web.core');
+    var screens = require('point_of_sale.screens');
 
     var QWeb = core.qweb;
 
@@ -92,4 +93,23 @@ odoo.define('pos_discount_absolute', function (require) {
             }
         },
     });
+
+
+    screens.OrderWidget.include({
+        update_summary: function(){
+            var order = this.pos.get('selectedOrder');
+            if (!order){
+                return;
+            }
+            this._super();
+            if (!order.get_orderlines().length) {
+                return;
+            }
+            var total     = order ? order.get_total_with_tax() : 0;
+            total = total != 0 && total || 'FREE'
+            this.el.querySelector('.summary .total > .value').textContent = this.format_currency(total);
+        },
+
+    });
+
 });
