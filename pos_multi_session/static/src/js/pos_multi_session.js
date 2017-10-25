@@ -98,7 +98,8 @@ odoo.define('pos_multi_session', function(require){
                 }
 
                 self.multi_session = new exports.MultiSession(self);
-
+                console.log('==================', self.user.name, 'Has entered a session =======================')
+                console.log('==================', JSON.stringify(self.config.current_session_id), 'Has entered a session =======================')
             });
         },
         ms_my_info: function(){

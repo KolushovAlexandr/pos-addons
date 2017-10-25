@@ -36,10 +36,10 @@ class Controller(BusController):
 
     @odoo.http.route('/pos_multi_session/test/gc', type="http", auth="user")
     def pos_multi_session_test_gc(self):
-        allow_external_tests = request.env['ir.config_parameter'].get_param('pos_multi_session.allow_external_tests')
-        if not allow_external_tests:
-            _logger.warning('Create System Parameter "pos_multi_session.allow_external_tests" to use test GC')
-            return 'Create System Parameter "pos_multi_session.allow_external_tests" to use test GC'
+        # allow_external_tests = request.env['ir.config_parameter'].get_param('pos_multi_session.allow_external_tests')
+        # if not allow_external_tests:
+        #     _logger.warning('Create System Parameter "pos_multi_session.allow_external_tests" to use test GC')
+        #     return 'Create System Parameter "pos_multi_session.allow_external_tests" to use test GC'
 
         timeout_ago = datetime.datetime.utcnow()
         domain = [('create_date', '<=', timeout_ago.strftime(DEFAULT_SERVER_DATETIME_FORMAT))]
