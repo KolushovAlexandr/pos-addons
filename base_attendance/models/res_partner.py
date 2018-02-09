@@ -48,14 +48,14 @@ class HrPartner(models.Model):
             if partner.pin and not partner.pin.isdigit():
                 raise exceptions.ValidationError(_("The PIN must be a sequence of digits."))
 
-    # @api.model
-    # def attendance_scan(self, barcode):
-    #     """ Receive a barcode scanned from the Kiosk Mode and change the attendances of corresponding partner.
-    #         Returns either an action or a warning.
-    #     """
-    #     partner = self.search([('barcode', '=', barcode)], limit=1)
-    #     return partner and partner.attendance_action('base_attendance.hr_attendance_action_kiosk_mode') or \
-    #         {'warning': _('No partner corresponding to barcode %(barcode)s') % {'barcode': barcode}}
+    @api.model
+    def attendance_scan(self, barcode):
+        """ Receive a barcode scanned from the Kiosk Mode and change the attendances of corresponding partner.
+            Returns either an action or a warning.
+        """
+        partner = self.search([('barcode', '=', barcode)], limit=1)
+        return partner and partner.attendance_action('base_attendance.hr_attendance_action_kiosk_mode') or \
+            {'warning': _('No partner corresponding to barcode %(barcode)s') % {'barcode': barcode}}
 
     @api.multi
     def attendance_manual(self, next_action, entered_pin=None):
