@@ -9,4 +9,4 @@ class BaseConfigSettings(models.TransientModel):
                                                  (1, 'Partners must enter their PIN to check in manually in the "Kiosk Mode".')],
                                                 string='Partner PIN',
                                                 help='Enable or disable partner PIN identification at check in',
-                                                implied_group="base_attendance.group_hr_attendance_use_pin")
+                                                implied_group="base_attendance.group_res_attendance_use_pin")

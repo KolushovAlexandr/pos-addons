@@ -61,7 +61,7 @@ class HrPartner(models.Model):
     def attendance_manual(self, next_action, entered_pin=None):
         self.ensure_one()
         if not (entered_pin is None) or \
-                self.env['res.users'].browse(SUPERUSER_ID).has_group('hr_partner_attendance.group_hr_attendance_use_pin'):
+                self.env['res.users'].browse(SUPERUSER_ID).has_group('hr_partner_attendance.group_res_attendance_use_pin'):
             if entered_pin != self.pin:
                 return {'warning': _('Wrong PIN')}
         return self.attendance_action(next_action)
@@ -73,7 +73,7 @@ class HrPartner(models.Model):
             next_action defines which menu the check in/out message should return to. ("My Attendances" or "Kiosk Mode")
         """
         self.ensure_one()
-        action_message = self.env.ref('base_attendance.hr_attendance_action_greeting_message').read()[0]
+        action_message = self.env.ref('base_attendance.res_attendance_action_greeting_message').read()[0]
         action_message['previous_attendance_change_date'] = self.last_attendance_id and (self.last_attendance_id.check_out or self.last_attendance_id.check_in) or False
         action_message['partner_name'] = self.name
         action_message['next_action'] = next_action

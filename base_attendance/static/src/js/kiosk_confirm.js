@@ -81,7 +81,7 @@ var KioskConfirm = Widget.extend({
 
     init: function (parent, action) {
         this._super.apply(this, arguments);
-        this.next_action = 'base_attendance.hr_attendance_action_kiosk_mode';
+        this.next_action = 'base_attendance.res_attendance_action_kiosk_mode';
         this.partner_id = action.partner_id;
         this.partner_name = action.partner_name;
         this.partner_state = action.partner_state;
@@ -90,9 +90,9 @@ var KioskConfirm = Widget.extend({
 
     start: function () {
         var self = this;
-        self.session.user_has_group('base_attendance.group_hr_attendance_use_pin').then(function(has_group){
+        self.session.user_has_group('base_attendance.group_res_attendance_use_pin').then(function(has_group){
             self.use_pin = has_group;
-            self.$el.html(QWeb.render("HrAttendanceKioskConfirm", {widget: self}));
+            self.$el.html(QWeb.render("ResAttendanceKioskConfirm", {widget: self}));
             self.start_clock();
         });
         return self._super.apply(this, arguments);
