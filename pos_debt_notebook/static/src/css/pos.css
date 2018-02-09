@@ -93,3 +93,7 @@
 .notbold{
     font-weight:normal !important;
 }​
+
+.pos .increased_width.label{
+    width: 150px !important;
+}
