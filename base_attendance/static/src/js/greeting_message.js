@@ -11,7 +11,7 @@ var _t = core._t;
 
 
 var GreetingMessage = Widget.extend(BarcodeHandlerMixin, {
-    template: 'HrAttendanceGreetingMessage',
+    template: 'ResAttendanceGreetingMessage',
 
     events: {
         "click .o_hr_attendance_button_dismiss": function() {
@@ -28,19 +28,19 @@ var GreetingMessage = Widget.extend(BarcodeHandlerMixin, {
         // to the (likely) appropriate menu, according to the user access rights
         if(!action.attendance) {
             this.stop_listening();
-            this.session.user_has_group('base_attendance.group_hr_attendance_user').then(function(has_group) {
+            this.session.user_has_group('base_attendance.group_res_attendance_user').then(function(has_group) {
                 if(has_group) {
-                    self.next_action = 'base_attendance.hr_attendance_action_kiosk_mode';
+                    self.next_action = 'base_attendance.res_attendance_action_kiosk_mode';
                 } else {
-                    self.next_action = 'base_attendance.hr_attendance_action_my_attendances';
+                    self.next_action = 'base_attendance.res_attendance_action_my_attendances';
                 }
             });
             return;
         }
 
-        this.next_action = action.next_action || 'base_attendance.hr_attendance_action_my_attendances';
+        this.next_action = action.next_action || 'base_attendance.res_attendance_action_my_attendances';
         // no listening to barcode scans if we aren't coming from the kiosk mode (and thus not going back to it with next_action)
-        if (this.next_action !== 'base_attendance.hr_attendance_action_kiosk_mode' && this.next_action.tag !== 'hr_attendance_kiosk_mode') {
+        if (this.next_action !== 'base_attendance.res_attendance_action_kiosk_mode' && this.next_action.tag !== 'res_attendance_kiosk_mode') {
             this.stop_listening();
         }
         this.attendance = action.attendance;
