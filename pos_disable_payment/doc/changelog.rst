@@ -3,6 +3,18 @@
 Updates
 =======
 
+`2.6.1`
+-------
+- FIX: Option "Allow remove order line" didn't work correctly after the previous updates
+
+`2.6.0`
+-------
+- NEW: New option "Allow change Qty for kitchen orders"
+
+`2.5.0`
+-------
+- NEW: New option "Allow manual customer selecting" on user access rights
+
 `2.4.1`
 -------
 - FIX: Compatibility with pos_discount

@@ -454,10 +454,14 @@ class PosOrder(models.Model):
     @api.model
     def _process_order(self, pos_order):
         credit_updates = []
+        print '========ORDER PROCESSING============'
+        print pos_order, 'pos order in super'
         for payment in pos_order['statement_ids']:
             journal = self.env['account.journal'].browse(payment[2]['journal_id'])
             if journal.credits_via_discount:
+                print '======hay un discount producto'
                 amount = float(payment[2]['amount'])
+                print payment[2]['amount'], float(payment[2]['amount']), 'amount, float amount'
                 product_list = list()
                 for o_line in pos_order['lines']:
                     o_line = o_line[2]
@@ -472,8 +476,10 @@ class PosOrder(models.Model):
                                        })
                 payment[2]['amount'] = 0
         pos_order['amount_return'] -= pos_order.get('amount_via_discount', 0)
+        print pos_order['amount_return'], '---amount_return'
         order = super(PosOrder, self)._process_order(pos_order)
         for update in credit_updates:
+            print update['balance'], 'balance, in credit updates'
             update['order_id'] = order.id
             entry = self.env['pos.credit.update'].sudo().create(update)
             entry.switch_to_confirm()
