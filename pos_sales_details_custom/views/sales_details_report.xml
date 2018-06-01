@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="report_saledetails" inherit_id="point_of_sale.report_saledetails">
+    <xpath expr="//div[hasclass('text-center')]" position="after">
+        <table>
+            <tbody>
+                <tr>
+                    <td>Printed by: </td>
+                    <td>Number of Orders: </td>
+                    <td>Point of Sale: </td>
+                </tr>
+            </tbody>
+        </table>
+    </xpath>
+</template>
+
+</odoo>
