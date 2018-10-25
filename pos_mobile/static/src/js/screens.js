@@ -264,9 +264,9 @@ odoo.define('pos_mobile.screens', function (require) {
     screens.PaymentScreenWidget.include({
         renderElement: function(){
             this._super();
-            var payment_method = $(".payment-screen .paymentmethods-container");
+            var payment_method = this.$el.find("div.left-contentpc40touch-scrollablescrollable-y .paymentmethods-container");
             payment_method.detach();
-            $('.payment-screen .paymentlines-container').after(payment_method);
+            this.$el.find('.paymentlines-container').after(payment_method);
         }
     });
 
