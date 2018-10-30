@@ -3,6 +3,11 @@
 Updates
 =======
 
+`1.1.0`
+-------
+
+- **IMP:** Added compatibility with pos_multi_session
+
 `1.0.5`
 -------
 
