@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
         <record id="view_template_property_form" model="ir.ui.view">
             <field name="name">product.template.common.form.inherit</field>
             <field name="model">product.template</field>
@@ -20,7 +19,6 @@
                 <form string="POS Product Notes">
                     <sheet>
                         <group>
-                            <field name="number" required="1"/>
                             <field name="name" required="1"/>
                         </group>
                     </sheet>
@@ -32,8 +30,8 @@
             <field name="name">pos.product_notes.tree</field>
             <field name="model">pos.product_notes</field>
             <field name="arch" type="xml">
-                <tree string="POS Product Notes">
-                    <field name="number"/>
+                <tree>
+                    <field name="sequence" widget="handle"/>
                     <field name="name"/>
                 </tree>
             </field>
@@ -53,5 +51,4 @@
             </field>
         </record>
         <menuitem id="menu_pos_product_notes" action="pos_product_notes_action" parent="point_of_sale.menu_point_config_product" sequence="26" />
-    </data>
 </odoo>

@@ -1,3 +1,7 @@
+.. image:: https://img.shields.io/badge/license-LGPL--3-blue.png
+   :target: https://www.gnu.org/licenses/lgpl
+   :alt: License: LGPL-3
+
 ==========================
  Hardware Network Printer
 ==========================
@@ -13,6 +17,7 @@ Credits
 Contributors
 ------------
 * Dinar Gabbasov <gabbasov@it-projects.info>
+* Tom Blauwendraat <tom@sunflowerweb.nl>
 
 Sponsors
 --------

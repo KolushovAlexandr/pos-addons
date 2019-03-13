@@ -1,3 +1,73 @@
+`5.1.5`
+-------
+- **FIX:** Payment mistakes on in case SERIALIZATION_FAILURE in order processing
+
+`5.1.3`
+-------
+- **FIX:** Error related to pos loading with the lack of customers
+
+`5.1.2`
+-------
+- **FIX:** Availability to buy credit top-up products with discount credits
+- **FIX:** Error related to automatic receipt printing
+- **ADD:** Mandatory Payment Method selection for return orders
+- **FIX:** Compatibility with pos_category_multi
+- **FIX:** Unavailability to cash out credits from journals with defined category
+- **FIX:** Errors on loading debts on POS opening were ignored
+
+`5.1.1`
+-------
+- **FIX:** Compatibility with pos_orders_history_return module
+
+`5.1.0`
+-------
+- **NEW:** Wizard allow to create invoices for sets of partners: `Balance update`, `New Balance`
+- **FIX:** Error related to paying with not discount credit journals in POS
+- **FIX:** Invoices paid with credit journals now counts in partner debts
+
+`5.0.3`
+-------
+- **FIX:** Error related to invoices created in the "Generate POS Credit Invoices" wizard. Invoices were created with wrong type.
+
+`5.0.2`
+-------
+
+- **FIX:** Error related to debt loading after creating a new partner in POS
+
+`5.0.1`
+-------
+
+- **Fix:** installation error in some cases
+
+`5.0.0`
+-------
+
+- **ADD:** Cash out feature
+- **ADD:** Multiple debit credit accounts
+- **ADD:** Smart button with debts/credits on a customer view
+- **ADD:** Credits via discount
+- **FIX:** Debt history for Chinese localization
+- **FIX:** Error when user doesn't have timezone
+- **FIX:** user_id was always replaced to Administrator in pos.order
+- **IMP:** Updating debts/credits data for partners in opened orders after restoring the internet connection
+- **ADD:** Option 'Autopay' for debt journals
+
+`4.4.3`
+-------
+
+- **FIX:** Compatibility with Chinese localization
+
+`4.4.2`
+-------
+
+- **ADD:** Compatibility with Pos Mobile
+
+`4.4.1`
+-------
+
+- **FIX:** Extra Debt payment lines when using "Pay Full Debt" method.
+- **FIX:** Incorrect order validation.
+
 `4.4.0`
 -------
 

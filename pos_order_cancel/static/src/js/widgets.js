@@ -58,12 +58,17 @@ odoo.define('pos_order_cancel.widgets', function (require) {
                 'reasons': self.pos.cancelled_reason,
                 'value': self.pos.selected_cancelled_reason.name,
                 'type': type,
-                confirm: function(reason){
+                confirm: function(reason, cancelled_reason_ids){
                     if (type === 'product') {
-                        order.save_reason_cancelled_line(orderline, reason);
+                        order.save_reason_cancelled_line(orderline, reason, cancelled_reason_ids);
                     }
                     if (type === 'order') {
-                        order.save_canceled_order(reason);
+                        order.destroy_and_upload_as_canceled(reason, cancelled_reason_ids);
+                    }
+                },
+                cancel: function() {
+                    if (type === 'product') {
+                        orderline.cancel_quantity_changes();
                     }
                 }
             });
@@ -78,6 +83,34 @@ odoo.define('pos_order_cancel.widgets', function (require) {
             }
             this._super(val);
         },
+    });
+
+    screens.NumpadWidget.include({
+        clickDeleteLastChar: function() {
+            var self = this;
+            var mode = this.state.get('mode');
+            var order = self.pos.get_order();
+            var current_line = order.get_selected_orderline();
+            if (this.pos.config.show_popup_change_quantity && mode === 'quantity' && current_line && current_line.quantity !== 0) {
+                this.gui.show_popup('number',{
+                    'title': _t('Quantity for Cancellation'),
+                    'value': 1,
+                    'confirm': function(value) {
+                        order.ask_cancel_reason = true;
+                        var new_qty = current_line.quantity - value;
+                        current_line.set_quantity(new_qty);
+                        current_line.trigger('change', current_line);
+                        if (new_qty === 0) {
+                            self.state.set({
+                                buffer: ''
+                            });
+                        }
+                    }
+                });
+            } else {
+                return this.state.deleteLastChar();
+            }
+        }
     });
 
     var ConfirmCancellationPopupWidget = PopupWidget.extend({
@@ -114,13 +147,13 @@ odoo.define('pos_order_cancel.widgets', function (require) {
             this.renderElement();
         },
         get_reason_by_id: function(id) {
-            return this.options.reasons.find(function(item) {
+            return _.find(this.options.reasons, function(item){
                 return item.id === Number(id);
             });
         },
         click_cancelled_reason: function(e) {
             var self = this;
-            var id = e.currentTarget.id;
+            var id = e.currentTarget.getAttribute('data-id');
             if (id === 'other') {
                 self.gui.show_screen('reason_screen', {type: this.type});
             } else {
@@ -137,20 +170,33 @@ odoo.define('pos_order_cancel.widgets', function (require) {
             }
         },
         click_confirm: function(){
-            this.gui.close_popup();
-            if( this.options.confirm ){
-                var active_reasons = this.options.reasons.filter(function(item) {
-                    return item.active === true;
-                });
-                var active_reasons_name = [];
-                active_reasons.forEach(function(item) {
-                    active_reasons_name.push(item.name);
-                });
-                var reason = this.$('.popup-confirm-cancellation textarea').val();
-                if (reason) {
-                    reason += "; ";
+            var self = this;
+            var active_reasons = this.options.reasons.filter(function(item) {
+                return item.active === true;
+            });
+            var active_reasons_name = [];
+            var cancelled_reason_ids = [];
+            active_reasons.forEach(function(item) {
+                active_reasons_name.push(item.name);
+                cancelled_reason_ids.push(item.id);
+            });
+            var reason = this.$('.popup-confirm-cancellation textarea').val();
+            if(active_reasons_name.length > 0 || reason) {
+                this.gui.close_popup();
+                if( this.options.confirm ){
+                    if (reason) {
+                        reason += "; ";
+                    }
+                    this.options.confirm.call(this, reason + active_reasons_name.join("; "), cancelled_reason_ids);
                 }
-                this.options.confirm.call(this, reason + active_reasons_name.join("; "));
+            } else {
+                this.gui.show_popup('error',{
+                    'title': _t('Warning'),
+                    'body': _t('Indicate the reason for cancellation.'),
+                    'cancel': function() {
+                        self.gui.screen_instances.products.order_widget.show_popup(self.type);
+                    }
+                });
             }
         },
     });
@@ -160,10 +206,12 @@ odoo.define('pos_order_cancel.widgets', function (require) {
         template: 'ReasonCancellationScreenWidget',
         events: {
             'click .reason-line': function (event) {
-                var line = $('.reason-line#'+parseInt(event.currentTarget.id));
-                this.line_select(line, parseInt(event.currentTarget.id));
+                var id = event.currentTarget.getAttribute('data-id');
+                var line = $('.reason-list-contents').find(".reason-line[data-id='" +parseInt(id)+"']");
+                this.line_select(line, parseInt(id));
             },
             'click .reason-back': function () {
+                this.cancel_changes();
                 this.gui.back();
             },
             'click .reason-next': function () {
@@ -214,15 +262,24 @@ odoo.define('pos_order_cancel.widgets', function (require) {
                 return item.active === true;
             });
             var active_reasons_name = [];
+            var cancelled_reason_ids = [];
             active_reasons.forEach(function(item) {
                 active_reasons_name.push(item.name);
+                cancelled_reason_ids.push(item.id);
             });
             var reason = active_reasons_name.join("; ");
             if (type === 'product') {
-                order.save_reason_cancelled_line(orderline, reason);
+                order.save_reason_cancelled_line(orderline, reason, cancelled_reason_ids);
             }
             if (type === 'order') {
-                order.save_canceled_order(reason);
+                order.destroy_and_upload_as_canceled(reason, cancelled_reason_ids);
+            }
+        },
+        cancel_changes: function() {
+            var type = this.get_type();
+            if (type === 'product') {
+                var order = this.pos.get_order();
+                var line = order.get_selected_orderline().cancel_quantity_changes();
             }
         },
         toggle_save_button: function(){
@@ -244,7 +301,7 @@ odoo.define('pos_order_cancel.widgets', function (require) {
                 this.get_reason_by_id(id).active = true;
             }
             this.show_reason_button = false;
-            var exist_active_reason = this.pos.cancelled_reason.find(function(item) {
+            var exist_active_reason = _.find(this.pos.cancelled_reason, function(item){
                 return item.active === true;
             });
             if (exist_active_reason) {
@@ -256,7 +313,7 @@ odoo.define('pos_order_cancel.widgets', function (require) {
             return this.gui.get_current_screen_param('type');
         },
         get_reason_by_id: function(id) {
-            return this.pos.cancelled_reason.find(function(item) {
+            return _.find(this.pos.cancelled_reason, function(item){
                 return item.id === Number(id);
             });
         },

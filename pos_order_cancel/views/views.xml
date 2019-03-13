@@ -18,7 +18,7 @@
         <field name="name">pos.cancelled_reason.tree</field>
         <field name="model">pos.cancelled_reason</field>
         <field name="arch" type="xml">
-            <tree string="Refund / Cancellation Reason">
+            <tree>
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
             </tree>
@@ -59,7 +59,7 @@
             </xpath>
 
             <xpath expr="//notebook" position="inside">
-                <page string="Refunds / Cancellations">
+                <page name="cancellations" string="Refunds / Cancellations">
                     <group>
                         <separator string="Order Cancellation Reason" colspan="4" attrs="{'invisible': ['|',('is_cancelled','!=',True),('cancellation_reason','=',False)]}"/>
                         <field name="cancellation_reason" colspan="4" nolabel="1" readonly="1" attrs="{'invisible': [('is_cancelled','!=',True)]}"/>
@@ -67,9 +67,10 @@
                     </group>
                     <group>
                         <field name="canceled_lines" colspan="4" nolabel="1">
-                            <tree string="Canceled Order lines" editable="bottom" create="false" delete="false">
+                            <tree editable="bottom" create="false" delete="false">
                                 <field name="product_id"/>
                                 <field name="qty"/>
+                                <field name="current_qty"/>
                                 <field name="price_unit" widget="monetary"/>
                                 <field name="discount" widget="monetary"/>
                                 <field name="reason"/>
@@ -150,6 +151,7 @@
                 <field name="price_unit" type="measure"/>
                 <field name="reason"/>
                 <field name="qty" type="measure"/>
+                <field name="current_qty" type="measure"/>
                 <field name="price_subtotal" type="measure"/>
             </pivot>
         </field>
@@ -163,15 +165,19 @@
                 <group col="4">
                     <field name="product_id"/>
                     <field name="qty"/>
+                    <field name="current_qty"/>
                     <field name="price_unit" widget="monetary"/>
                     <field name="discount" widget="monetary"/>
-                    <field name="reason"/>
                     <field name="canceled_date"/>
                     <field name="user_id"/>
                     <field name="order_id"/>
                 </group>
                 <group>
-                    <field name="tax_ids"/>
+                    <field name="tax_ids" widget="many2many_tags"/>
+                </group>
+                <group>
+                    <field name="reason"/>
+                    <field name="cancelled_reason_ids" widget="many2many_tags"/>
                 </group>
             </form>
         </field>
@@ -181,9 +187,10 @@
         <field name="name">pos.order.line.canceled.tree</field>
         <field name="model">pos.order.line.canceled</field>
         <field name="arch" type="xml">
-            <tree string="Canceled Lines" create="false" delete="false">
+            <tree create="false" delete="false">
                 <field name="product_id"/>
                 <field name="qty"/>
+                <field name="current_qty"/>
                 <field name="price_unit" widget="monetary"/>
                 <field name="order_id"/>
                 <field name="reason"/>
@@ -205,9 +212,11 @@
                 <filter string="Today" name="today" domain="[('canceled_date','&gt;=',time.strftime('%%Y-%%m-%%d'))]"/>
                 <filter string="This Month" name="thismonth" domain="[('canceled_date','&gt;=',time.strftime('%%Y-%%m-01'))]"/>
                 <filter string="This Year" name="thisyear" domain="[('canceled_date','&gt;=',time.strftime('%%Y-01-01'))]"/>
+                <filter string="No Negative Refunds" name="no_negative_refunds" domain="[('current_qty','>=',0)]"/>
                 <field name="product_id"/>
                 <field name="user_id"/>
                 <field name="reason"/>
+                <field name="current_qty"/>
                 <group expand="1" string="Group By">
                     <filter string="Users" context="{'group_by':'user_id'}"/>
                     <separator/>
@@ -227,7 +236,7 @@
         <field name="name">Refund / Cancelation Details</field>
         <field name="res_model">pos.order.line.canceled</field>
         <field name="view_type">form</field>
-        <field name="view_mode">graph,tree,form,pivot</field>
+        <field name="view_mode">tree,graph,form,pivot</field>
         <field name="search_view_id" ref="view_report_cancelations_search"/>
         <field name="context">{'search_default_thismonth':1, 'group_by':[]}</field>
     </record>
