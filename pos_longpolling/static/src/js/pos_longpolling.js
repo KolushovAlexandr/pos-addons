@@ -29,7 +29,6 @@ odoo.define('pos_longpolling', function(require){
             this.set_activated(false);
             var callback = this.longpolling_connection.network_is_on;
             this.add_channel_callback("pos.longpolling", callback, this.longpolling_connection);
-
         },
         poll: function(address) {
             var self = this;
@@ -50,9 +49,7 @@ odoo.define('pos_longpolling', function(require){
                 }
                 //difference with original
                 var poll_connection = self.longpolling_connection;
-                if (poll_connection.waiting_poll_response) {
-                    poll_connection.waiting_poll_response = false;
-                }
+                poll_connection.set_waiting_poll_response(false);
                 poll_connection.network_is_on();
             }, function(unused, e) {
                 //difference with original
@@ -213,7 +210,7 @@ odoo.define('pos_longpolling', function(require){
             this.bus = bus;
             // Is the message "PONG" received from the server
             this.response_status = false;
-            this.waiting_poll_response = true;
+            this.set_waiting_poll_response(true);
         },
         network_is_on: function(message) {
             if (message) {
@@ -225,7 +222,7 @@ odoo.define('pos_longpolling', function(require){
         },
         network_is_off: function() {
             this.update_timer();
-            this.waiting_poll_response = true;
+            this.set_waiting_poll_response(true);
             this.set_is_online(false);
         },
         set_is_online: function(is_online) {
@@ -234,6 +231,13 @@ odoo.define('pos_longpolling', function(require){
             }
             this.is_online = is_online;
             this.trigger("change:poll_connection", is_online);
+        },
+        set_waiting_poll_response: function(status) {
+            if (this.waiting_poll_response === status) {
+                return;
+            }
+            this.waiting_poll_response = status;
+            this.trigger("change:poll_response", status);
         },
         update_timer: function(){
             this.stop_timer();
@@ -331,7 +335,7 @@ odoo.define('pos_longpolling', function(require){
             var self = this;
             element.attr('bid', bus.bus_id);
             this.rerender_poll_status(bus);
-            bus.longpolling_connection.on("change:poll_connection", function(is_online){
+            bus.longpolling_connection.on("change:poll_connection change:poll_response", function(is_online){
                 self.rerender_poll_status(bus);
             });
             element.on('click', function(event){
