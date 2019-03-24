@@ -119,7 +119,13 @@ odoo.define('pos_longpolling', function(require){
             });
             this.lonpolling_activated = true;
             this.longpolling_connection.send_ping({serv: this.serv_adr});
+            // one tab per browser is_master but we need to be able to poll with several tabs with odoo opened
+            // https://github.com/odoo/odoo/blob/10.0/addons/bus/static/src/js/bus.js#L134
+            var is_master = this.is_master;
+            this.is_master = true;
             this.start_polling();
+            this.is_master = is_master;
+
             this.set_activated(true);
             this.check_sleep_mode();
         },
