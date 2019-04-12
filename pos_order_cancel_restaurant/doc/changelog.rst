@@ -1,10 +1,15 @@
+`1.5.1`
+-------
+
+**Fix:** Removing an empty kitchen order did not require for the cancelling reason
+
 `1.5.0`
-------
+-------
 
 **New:** Ask manager for kitchen orders only
 
 `1.4.2`
-------
+-------
 
 **Improvement:** Compatibility with pos_category_multi module
 
