@@ -1,3 +1,8 @@
+`2.2.1`
+-------
+
+- **Fix:** Clicking the wifi icon provoked sending orders omitting calling handlers from sync icons and consequently the sync among POSes
+
 `2.2.0`
 -------
 

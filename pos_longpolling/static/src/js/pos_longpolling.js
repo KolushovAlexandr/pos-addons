@@ -332,10 +332,22 @@ odoo.define('pos_longpolling', function(require){
         start: function(){
             this._super();
             var self = this;
+            this.preconfigure_icon_events();
             var element = this.$el.find('.serv_primary');
             var bus_id = this.pos.bus.bus_id;
             this.start_bus(this.pos.bus, element);
             this.start_additional_buses();
+        },
+        preconfigure_icon_events: function(){
+            this.wi_fi_icon_handler = $._data(this.$el[0],"events").click[0].handler;
+            this.$el.off();
+        },
+        on_click_sync_bytton_action: function(bus, element, event){
+            var self = this;
+            this.icon_rotating(element, true);
+            return bus.longpolling_connection.send_ping({'serv': bus.serv_adr}).always(function(){
+                self.icon_rotating(element, false);
+            });
         },
         start_bus: function(bus, element){
             var self = this;
@@ -345,9 +357,11 @@ odoo.define('pos_longpolling', function(require){
                 self.rerender_poll_status(bus);
             });
             element.on('click', function(event){
-                self.icon_rotating(element, true);
-                bus.longpolling_connection.send_ping({'serv': bus.serv_adr}).always(function(){
-                    self.icon_rotating(element, false);
+                self.on_click_sync_bytton_action(bus, element, event);
+            });
+            element.parent().find('.js_disconnected, .js_connected').on('click', function(event) {
+                self.on_click_sync_bytton_action(bus, element, event).done(function(res) {
+                    return self.wi_fi_icon_handler();
                 });
             });
         },
