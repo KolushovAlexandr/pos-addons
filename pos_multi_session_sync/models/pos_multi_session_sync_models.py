@@ -124,6 +124,12 @@ class PosMultiSessionSync(models.Model):
         return message
 
     @api.multi
+    def broadcast_order_update(self, order, message):
+        self.broadcast_message(message)
+        return {'action': 'update_revision_ID', 'revision_ID': order.revision_ID,
+                'order_ID': message['data']['sequence_number'], 'run_ID': order.run_ID}
+
+    @api.multi
     def set_and_broadcast_order(self, message):
         self.ensure_one()
 
@@ -132,12 +138,10 @@ class PosMultiSessionSync(models.Model):
         if not order:
             return updated_message
 
-        self.broadcast_message(updated_message)
-        return {'action': 'update_revision_ID', 'revision_ID': order.revision_ID,
-                'order_ID': updated_message['data']['sequence_number'], 'run_ID': order.run_ID}
+        return self.broadcast_order_update(order, updated_message)
 
     @api.multi
-    def set_order(self, message):
+    def set_order(self, message, force=False):
         self.ensure_one()
         order_uid = message['data']['uid']
         sequence_number = message['data']['sequence_number']
@@ -147,7 +151,7 @@ class PosMultiSessionSync(models.Model):
 
         if revision == "nonce":
             return (False, {'action': ''})
-        elif not revision or (order and order.state == 'deleted'):
+        elif (not revision and not force) or (order and order.state == 'deleted'):
             _logger.debug('Revision error %s %s', order_uid, order.state)
             return (False, {'action': 'revision_error', 'order_uid': order_uid, 'state': order.state})
 
@@ -246,6 +250,7 @@ class PosMultiSessionSync(models.Model):
         order = self.env['pos_multi_session_sync.order'].search([('order_uid', '=', order_uid)])
 
         order_data = message['data'].get('order_data', False)
+
         if not order and order_data:
             # order paid in offline
             order_data = json.loads(order_data)
@@ -253,9 +258,45 @@ class PosMultiSessionSync(models.Model):
             order, order_data = self.set_order(order_data)
             order_uid = order.order_uid
 
-        if order.state is not 'deleted':
-            revision = self.check_order_revision(message, order)
-            if not revision:
+        revision = self.check_order_revision(message, order)
+        # if revision is True then it means order was not changed from online since last changes
+        if order.state is not 'deleted' and not revision:
+            if message['data']['finalized'] and order_data:
+                order_data = json.loads(order_data)
+                # example: order paid offline, but there were some additions to the order from online poses
+                # we compare paid order to existing one in order to split it up onto paid and not paid parts
+                server_order = json.loads(order.order)
+                server_order_lines = [i[2] for i in server_order['data']['lines']]
+                order_data_lines = [i[2] for i in order_data['data']['lines']]
+                server_order_lines_uids = [(i['uid'], i['product_id']) for i in server_order_lines]
+                order_data_lines_uids = [(i['uid'], i['product_id']) for i in order_data_lines]
+                # TODO: quantities and any other modes are not counted
+                not_paid_lines_uids = [l[0] for l in list(set(server_order_lines_uids) - set(order_data_lines_uids))]
+
+                if len(not_paid_lines_uids):
+                    # save paid part as a new order
+                    order_data['data']['nonce'] = 'partially_paid'
+                    # change uid because otherwise the existing updated order will be removed
+                    old_order_uid = order_data['data']['uid']
+                    # order_data['data']['uid'] = old_order_uid + '-part'
+                    import wdb
+                    wdb.set_trace()
+                    partially_paid_order, pp_order_data = self.set_order(order_data, force=True)
+                    if not partially_paid_order:
+                        return {'action': 'revision_error', 'order_uid': old_order_uid}
+                    partially_paid_order.write({
+                        'state': 'deleted',
+                    })
+                    # update existing order with paid orderlines
+                    updated_order_lines = [[0, 0, l] for l in server_order_lines if l['uid'] in not_paid_lines_uids]
+                    server_order['data']['lines'] = updated_order_lines
+                    order.write({
+                        'order': json.dumps(server_order),
+                    })
+                    # import wdb
+                    # wdb.set_trace()
+                    return self.broadcast_order_update(order, order_data)
+            else:
                 return {'action': 'revision_error', 'order_uid': order_uid}
         if order:
             order.state = 'deleted'
