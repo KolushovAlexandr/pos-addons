@@ -50,9 +50,8 @@ odoo.define('pos_longpolling.chrome', function(require){
             });
             element.on('click', function(event){
                 self.icon_rotating(element, true);
-                bus.longpolling_connection.send_ping({'serv': bus.route}).always(function(){
-                    self.icon_rotating(element, false);
-                });
+                var rotate_icon = _.bind(self.icon_rotating, self, element, false);
+                bus.longpolling_connection.send_ping({'serv': bus.route}).then(rotate_icon, rotate_icon);
             });
         },
         start_additional_buses: function(){
