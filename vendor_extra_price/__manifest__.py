@@ -18,6 +18,9 @@
     "external_dependencies": {"python": [], "bin": []},
     "data": [
         "views/assets.xml",
+        "views/pricelist.xml",
+        "views/product.xml",
+        "views/res_partner.xml",
     ],
     "qweb": [
         "static/src/xml/base_import.xml",
