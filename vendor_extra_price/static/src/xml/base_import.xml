@@ -9,12 +9,12 @@
                 </t>
             </select>
 
-            <select name="pricelist_id" id="pricelist-select">
-                <option t-att-value="0"></option>
-                <t t-foreach="pricelists" t-as="pl">
-                    <option t-att-value="pl.id"><t t-esc="pl.name"/></option>
-                </t>
-            </select>
+<!--            <select name="pricelist_id" id="pricelist-select">-->
+<!--                <option t-att-value="0"></option>-->
+<!--                <t t-foreach="pricelists" t-as="pl">-->
+<!--                    <option t-att-value="pl.id"><t t-esc="pl.name"/></option>-->
+<!--                </t>-->
+<!--            </select>-->
         </div>
     </t>
 </templates>

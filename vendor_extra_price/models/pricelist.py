@@ -11,16 +11,11 @@ class PricelistItem(models.Model):
 
     @api.onchange('applied_on')
     def _onchange_applied_on(self):
-        if self.applied_on != '0_product_variant':
-            self.product_id = False
-        if self.applied_on != '1_product':
-            self.product_tmpl_id = False
-        if self.applied_on != '2_product_category':
-            self.categ_id = False
+        super(PricelistItem, self)._onchange_applied_on()
         if self.applied_on != '4_product_vendor':
             self.vendor_id = False
 
     @api.onchange('vendor_id')
-    def _onchange_applied_on(self):
+    def _onchange_vendor_id(self):
         if self.vendor_id == '4_product_vendor':
             self.price_surcharge = self.vendor_id.extra_price

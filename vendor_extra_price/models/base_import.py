@@ -31,5 +31,6 @@ class Import(models.TransientModel):
         if data:
             product_ids = self.env['product.template'].browse(import_result.get('ids'))
             product_ids.write(data)
-        import wdb;wdb.set_trace()
+            product_ids._compute_list_price()
+        # import wdb;wdb.set_trace()
         return import_result

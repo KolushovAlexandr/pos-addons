@@ -14,9 +14,9 @@ BaseImport.DataImport.include({
             this.fetch_vendors().then(function (result) {
                 _.extend(self.product_import, {vendors: result});
             });
-            this.fetch_pricelists().then(function (result) {
-                _.extend(self.product_import, {pricelists: result});
-            });
+            // this.fetch_pricelists().then(function (result) {
+            //     _.extend(self.product_import, {pricelists: result});
+            // });
         }
         return this._super();
     },
