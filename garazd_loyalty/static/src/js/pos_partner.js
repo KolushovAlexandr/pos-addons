@@ -11,6 +11,7 @@ odoo.define('garazd_loyalty.pos_partner', function(require){
     models.load_fields('res.partner',['loyalty_id', 'loyalty_discount']);
     models.load_fields('res.company',['amount_for_card']);
     models.load_fields('pos.config',['loyalty_card_offer']);
+    models.load_fields('product.product', ['standard_price', 'vendor_id']);
 
 
     var _super_orderline = models.Orderline.prototype;
@@ -43,7 +44,7 @@ odoo.define('garazd_loyalty.pos_partner', function(require){
                 ['product_id','=',self.product.id],
                 ['pricelist_id','=',self.pos.default_pricelist.id],
             ];
-            rpc.query({
+            return rpc.query({
                 model: 'product.pricelist.item',
                 method: 'search_read',
                 args: [domain],
@@ -62,13 +63,26 @@ odoo.define('garazd_loyalty.pos_partner', function(require){
 
                 if(partner && partner.loyalty_discount) {
                     if(!item) {
+                        var product = self.product;
                         new_discount = Math.min(Math.max(parseFloat(partner.loyalty_discount) || 0, 0),100);
+                        if (product.vendor_id) {
+                            var extra = (product.list_price - (product.standard_price || 0)) * 100 / product.list_price;
+                            if (new_discount >= extra) {
+                                new_discount = 0;
+                            }
+                        }
                     } else { // Skip if Product has special price in default pricelist
                         new_discount = 0;
                     }
                 }
 
-                var disc = Math.min(Math.max(parseFloat(new_discount) || 0, 0),100);
+                var disc = Math.min(
+                    Math.max(
+                        parseFloat(new_discount) || 0,
+                        0
+                    ),
+                    100
+                );
                 self.discount = disc;
                 self.discountStr = '' + disc;
                 self.trigger('change',self);

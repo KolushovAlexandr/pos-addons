@@ -6,7 +6,7 @@ class ProductTemplate(models.Model):
 
     vendor_id = fields.Many2one('res.partner', "Vendor")
 
-    @api.onchange('vendor_id')
+    @api.onchange('vendor_id', 'standard_price')
     def _compute_list_price(self):
         for rec in self:
             if rec.vendor_id:
