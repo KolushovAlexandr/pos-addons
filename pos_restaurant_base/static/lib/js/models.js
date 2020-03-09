@@ -8,6 +8,23 @@ odoo.define('pos_restaurant_base.models', function (require) {
 
     var QWeb = core.qweb;
 
+    var _super_orderline = models.Orderline.prototype;
+    models.Orderline = models.Orderline.extend({
+        set_dirty: function(dirty) {
+            //  DIFFERENCES FROM ORIGINAL:
+            // * check mp_dirty to avoid repeated orderline rendering
+            //   (https://github.com/odoo/odoo/pull/23266)
+            //
+            // * using orderline_change_line function instead trigger
+            //   allows you to avoid unnecessary multiple calls of the same functions
+            if (this.mp_dirty !== dirty) {
+                this.mp_dirty = dirty;
+                if (this.pos.gui.screen_instances.products) {
+                    this.pos.gui.screen_instances.products.order_widget.orderline_change_line(this);
+                }
+            }
+        }
+    });
 
     var _super_order = models.Order.prototype;
     models.Order = models.Order.extend({
@@ -39,7 +56,8 @@ odoo.define('pos_restaurant_base.models', function (require) {
             var product_id = line.get_product().id;
             var product_name_wrapped = line.generate_wrapped_product_name();
             var line_id = line.id;
-            return {qty: qty, note: note, product_id: product_id, product_name_wrapped: product_name_wrapped, line_id: line_id};
+            var unit = line.get_unit().name;
+            return {qty: qty, note: note, product_id: product_id, product_name_wrapped: product_name_wrapped, line_id: line_id, unit: unit};
         },
         computeChanges: function(categories, config){
             //  DIFFERENCES FROM ORIGINAL: 
@@ -50,6 +68,7 @@ odoo.define('pos_restaurant_base.models', function (require) {
             //
             // * new attributes in return: new_all and cancelled_all - lines without filtration with categories
             // * new attributes in return: line_id - id the changed line
+            // * new attributes in return: unit - product unit of line
             var current_res = this.build_line_resume();
             var old_res     = this.saved_resume || {};
             var json        = this.export_as_JSON();
@@ -69,6 +88,7 @@ odoo.define('pos_restaurant_base.models', function (require) {
                         'note':     curr.note,
                         'qty':      curr.qty,
                         'line_id':  curr.line_id,
+                        'unit':     curr.unit,
                     });
                 } else if (old.qty < curr.qty) {
                     add.push({
@@ -78,6 +98,7 @@ odoo.define('pos_restaurant_base.models', function (require) {
                         'note':     curr.note,
                         'qty':      curr.qty - old.qty,
                         'line_id':  curr.line_id,
+                        'unit':     curr.unit,
                     });
                 } else if (old.qty > curr.qty) {
                     rem.push({
@@ -87,6 +108,7 @@ odoo.define('pos_restaurant_base.models', function (require) {
                         'note':     curr.note,
                         'qty':      old.qty - curr.qty,
                         'line_id':  curr.line_id,
+                        'unit':     curr.unit,
                     });
                 }
             }
@@ -101,6 +123,7 @@ odoo.define('pos_restaurant_base.models', function (require) {
                         'note':     old.note,
                         'qty':      old.qty,
                         'line_id':  old.line_id,
+                        'unit':     old.unit,
                     });
                 }
             }
@@ -165,9 +188,21 @@ odoo.define('pos_restaurant_base.models', function (require) {
             }
         },
         print_order_receipt: function(printer, changes) {
+            var self = this;
+            function delay(ms) {
+                var d = $.Deferred();
+                setTimeout(function(){
+                    d.resolve();
+                }, ms);
+                return d.promise();
+            }
+            var q = $.when();
             if ( changes['new'].length > 0 || changes['cancelled'].length > 0){
-                var receipt = QWeb.render('OrderChangeReceipt',{changes:changes, widget:this});
-                printer.print(receipt);
+                q = q.then(function(){
+                    var receipt = QWeb.render('OrderChangeReceipt',{changes:changes, widget:self});
+                    printer.print(receipt);
+                    return delay(100);
+                });
             }
         },
         hasChangesToPrint: function(){

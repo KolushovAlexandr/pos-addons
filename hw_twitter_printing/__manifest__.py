@@ -5,30 +5,22 @@
     "category": "Point of Sale",
     # "live_test_URL": "",
     "images": [],
-    "version": "1.0.0",
+    "version": "10.0.1.0.0",
     "application": False,
-
     "author": "IT-Projects LLC, Dinar Gabbasov",
-    "support": "apps@it-projects.info",
+    "support": "pos@it-projects.info",
     "website": "https://it-projects.info/team/GabbasovDinar",
-    "license": "LGPL-3",
+    "license": "Other OSI approved licence",  # MIT
     # "price": 0.00,
     # "currency": "EUR",
-
-    "depends": [
-    ],
+    "depends": [],
     "external_dependencies": {"python": ["twython", "escpos"], "bin": []},
-    "data": [
-    ],
-    "qweb": [
-    ],
-    "demo": [
-    ],
-
-    "post_load": None,
+    "data": [],
+    "qweb": [],
+    "demo": [],
+    "post_load": "post_load",
     "pre_init_hook": None,
-    "post_init_hook": 'post_init',
-
+    "post_init_hook": "post_init",
     "auto_install": False,
     "installable": True,
 }

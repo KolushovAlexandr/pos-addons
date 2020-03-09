@@ -1,7 +1,9 @@
+[![Build Status](https://travis-ci.com/it-projects-llc/pos-addons.svg?branch=10.0)](https://travis-ci.com/it-projects-llc/pos-addons)
+
 Odoo POS addons
 ===============
 
-Odoo (OpenERP) POS addons 
+Odoo (OpenERP) POS addons
 
 List of repositories:
 ---------------------

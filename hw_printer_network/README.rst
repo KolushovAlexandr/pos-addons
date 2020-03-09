@@ -1,3 +1,7 @@
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+   :target: https://opensource.org/licenses/MIT
+   :alt: License: MIT
+
 ==========================
  Hardware Network Printer
 ==========================
@@ -13,6 +17,7 @@ Credits
 Contributors
 ------------
 * Dinar Gabbasov <gabbasov@it-projects.info>
+* Tom Blauwendraat <tom@sunflowerweb.nl>
 
 Sponsors
 --------
